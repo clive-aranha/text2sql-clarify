@@ -65,7 +65,7 @@ class Engine:
         if (
             analysis.status == Status.NEEDS_CLARIFICATION
             and analysis.ambiguities
-            and len(clarifications) < settings.max_clarification_rounds * 3
+            and not clarifications
         ):
             return Clarify(
                 question=analysis.clarifying_question or "Could you clarify?",

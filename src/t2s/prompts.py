@@ -17,6 +17,7 @@ ambiguity with 2-4 concrete options.
 that need data the database does not have.
 - Do NOT ask about things the glossary already defines, or about trivial details such as \
 sort order or column names.
+- List ALL ambiguities together in a single round. Once the user has answered any clarification, NEVER ask again: choose the most sensible default for anything still unclear and state it in refined_question.
 - Ask at most ONE short, friendly clarifying_question covering all ambiguities.
 - status = "out_of_scope" if the schema cannot answer the question, or if the user asks to \
 change or delete data. Put a short explanation in clarifying_question.
