@@ -1,0 +1,43 @@
+# Business definitions. "ambiguous: true" means the engine must ask the user.
+terms:
+  best customer:
+    ambiguous: true
+    interpretations:
+      - highest total revenue
+      - most orders placed
+      - highest average order value
+      - most recent purchase
+  top customer:
+    same_as: best customer
+  revenue:
+    ambiguous: true
+    interpretations:
+      - gross revenue (sum of quantity * unit_price)
+      - net revenue (gross minus orders.discount)
+      - revenue excluding cancelled and refunded orders
+  sales:
+    ambiguous: true
+    interpretations:
+      - revenue
+      - number of orders
+      - units sold
+  recent:
+    ambiguous: true
+    interpretations:
+      - last 7 days
+      - last 30 days
+      - last quarter
+  new customer:
+    definition: a customer whose customers.signup_date falls in the stated period
+  active customer:
+    definition: customers.is_active = true
+  last month:
+    definition: the previous full calendar month, not the last 30 days
+  last quarter:
+    definition: the previous full calendar quarter
+  order count:
+    definition: number of rows in orders
+  not available in this database:
+    - profit and margin (no cost data)
+    - customer age or gender
+    - website traffic

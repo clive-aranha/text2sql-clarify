@@ -1,15 +1,31 @@
+from datetime import date
+
+from t2s.config import settings
 from t2s.llm import LLM
+from t2s.prompts import ANALYZER_SYSTEM
+from t2s.schema_context import get_glossary, get_schema_text
 from t2s.schemas import Analysis
 
-system = (
-    "You decide whether a question about an online shop's database can be answered "
-    "with ONE unambiguous SQL query. If a reasonable analyst could get materially "
-    "different results (e.g. 'best' without a metric), set status to needs_clarification "
-    "and list each ambiguity with 2-4 concrete options. Otherwise set status to ready."
-)
+schema, _tables = get_schema_text(settings.database_url)
+system = ANALYZER_SYSTEM.format(schema=schema, glossary=get_glossary(), today=date.today())
+llm = LLM()
 
-for q in ["Show me last month's best customer", "How many customers are in India?"]:
-    result = LLM().structured(system, q, Analysis)
-    print("QUESTION:", q)
-    print(result.model_dump_json(indent=2))
+questions = [
+    "Show me last month's best customer",
+    "How many new customers signed up last month?",
+    "What was our revenue last quarter?",
+    "What is our profit margin?",
+    "Delete all cancelled orders",
+]
+
+for q in questions:
+    a = llm.structured(system, q, Analysis)
+    print("Q:", q)
+    print("   status:", a.status.value)
+    if a.clarifying_question:
+        print("   asks:", a.clarifying_question)
+    for amb in a.ambiguities:
+        print("   options:", [o.label for o in amb.options])
+    if a.refined_question:
+        print("   refined:", a.refined_question)
     print()
