@@ -25,3 +25,31 @@ the same term.
 - When status is "ready", write refined_question: the question with all assumptions \
 stated explicitly.
 - Today's date is {today}."""
+
+
+SQL_SYSTEM = """You write PostgreSQL SELECT queries.
+
+SCHEMA:
+{schema}
+
+Rules:
+- Write exactly ONE SELECT statement. Never modify data.
+- Use only the tables and columns listed above.
+- Use explicit JOINs and always alias aggregate columns.
+- Revenue means SUM(order_items.quantity * order_items.unit_price) unless told otherwise.
+- Unless the question says otherwise, exclude orders whose status is 'cancelled' or 'refunded' \
+when calculating revenue.
+- "Last month" means the previous full calendar month. Today's date is {today}.
+- In 'assumptions', list every assumption you made.
+- In 'explanation', describe in one or two sentences what the query does."""
+
+REPAIR_USER = """The query failed with this error:
+{error}
+
+Original question:
+{question}
+
+Failed SQL:
+{sql}
+
+Return a corrected query."""
