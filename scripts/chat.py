@@ -1,4 +1,4 @@
-from t2s.engine import Answer, Clarify, Engine, Refusal
+from t2s.engine import Answer, Clarify, Engine, Failure, Refusal
 
 engine = Engine()
 print("Text-to-SQL with clarification. Type 'quit' to exit.")
@@ -39,6 +39,6 @@ while True:
                 print("  ", row)
             if len(result.rows) > 10:
                 print(f"   ... {len(result.rows)} rows total")
-        elif isinstance(result, Refusal):
+        elif isinstance(result, (Refusal, Failure)):
             print("\nCan't do that:", result.reason)
         break

@@ -29,7 +29,7 @@ class LLM:
                 resp = self.client.chat.completions.create(
                     model=settings.llm_model,
                     messages=messages,
-                    temperature=0,
+                    temperature=0 if attempt == 0 else 0.3,
                     response_format={"type": "json_object"},
                 )
             except (BadRequestError, RateLimitError) as e:

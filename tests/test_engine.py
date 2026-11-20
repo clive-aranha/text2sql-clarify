@@ -1,4 +1,4 @@
-from t2s.engine import Answer, Clarify, Engine, Refusal
+from t2s.engine import Answer, Clarify, Engine, Failure, Refusal
 from t2s.schemas import Ambiguity, Analysis, Option, SQLDraft, Status
 
 
@@ -72,3 +72,13 @@ def test_unsafe_sql_is_repaired_once():
 def test_unsafe_sql_twice_is_refused():
     result = Engine(FakeLLM(READY, [BAD, BAD])).handle("How many customers?")
     assert isinstance(result, Refusal)
+
+
+class BrokenLLM:
+    def structured(self, *args, **kwargs):
+        raise RuntimeError("model unavailable")
+
+
+def test_llm_failure_is_handled_gracefully():
+    result = Engine(BrokenLLM()).handle("anything")
+    assert isinstance(result, Failure)

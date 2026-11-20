@@ -32,6 +32,11 @@ class Refusal(BaseModel):
     reason: str
 
 
+class Failure(BaseModel):
+    kind: str = "failure"
+    reason: str
+
+
 class Engine:
     def __init__(self, llm: LLM | None = None) -> None:
         self.llm = llm or LLM()
@@ -39,6 +44,14 @@ class Engine:
         self.glossary = get_glossary()
 
     def handle(
+        self, question: str, clarifications: list[str] | None = None
+    ) -> Clarify | Answer | Refusal | Failure:
+        try:
+            return self._handle(question, clarifications)
+        except RuntimeError:
+            return Failure(reason="The AI model had a temporary problem. Please try again.")
+
+    def _handle(
         self, question: str, clarifications: list[str] | None = None
     ) -> Clarify | Answer | Refusal:
         clarifications = clarifications or []
