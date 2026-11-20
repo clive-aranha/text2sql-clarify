@@ -13,10 +13,12 @@ dependencies = [
   "openai>=1.40",
   "sqlglot>=25",
   "pyyaml",
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff", "faker"]
+dev = ["pytest", "ruff", "faker", "httpx"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
