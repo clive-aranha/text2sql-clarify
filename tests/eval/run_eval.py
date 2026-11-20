@@ -43,7 +43,7 @@ def main() -> None:
         try:
             result = engine.handle(question)
             got = classify(result)
-        except Exception as e:  # keep going if one case crashes
+        except Exception as e:  # noqa: BLE001 - keep going if one case crashes
             result, got = None, "error"
             print("  error:", e)
 

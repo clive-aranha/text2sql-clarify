@@ -1,7 +1,8 @@
 import json
+import time
 from typing import TypeVar
 
-from openai import OpenAI
+from openai import BadRequestError, OpenAI, RateLimitError
 from pydantic import BaseModel, ValidationError
 
 from .config import settings
@@ -13,7 +14,7 @@ class LLM:
     def __init__(self) -> None:
         self.client = OpenAI(api_key=settings.llm_api_key, base_url=settings.llm_base_url)
 
-    def structured(self, system: str, user: str, model_cls: type[T], retries: int = 2) -> T:
+    def structured(self, system: str, user: str, model_cls: type[T], retries: int = 3) -> T:
         schema = json.dumps(model_cls.model_json_schema())
         messages = [
             {
@@ -23,13 +24,20 @@ class LLM:
             {"role": "user", "content": user},
         ]
         last_error: Exception | None = None
-        for _ in range(retries + 1):
-            resp = self.client.chat.completions.create(
-                model=settings.llm_model,
-                messages=messages,
-                temperature=0,
-                response_format={"type": "json_object"},
-            )
+        for attempt in range(retries + 1):
+            try:
+                resp = self.client.chat.completions.create(
+                    model=settings.llm_model,
+                    messages=messages,
+                    temperature=0,
+                    response_format={"type": "json_object"},
+                )
+            except (BadRequestError, RateLimitError) as e:
+                # The model failed to produce JSON, or we hit a rate limit: wait and retry.
+                last_error = e
+                time.sleep(2 * (attempt + 1))
+                continue
+
             raw = resp.choices[0].message.content or ""
             try:
                 return model_cls.model_validate_json(raw)
