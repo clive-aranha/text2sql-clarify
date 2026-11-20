@@ -1,3 +1,4 @@
+import argparse
 import time
 from decimal import Decimal
 from pathlib import Path
@@ -34,6 +35,11 @@ def classify(result) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=["engine", "baseline"], default="engine")
+    parser.add_argument("--out", default="eval_report.md")
+    args = parser.parse_args()
+
     cases = yaml.safe_load(Path(__file__).with_name("cases.yaml").read_text(encoding="utf-8"))
     engine = Engine()
     rows_out = []
@@ -41,7 +47,10 @@ def main() -> None:
     for case in cases:
         question, expect = case["q"], case["expect"]
         try:
-            result = engine.handle(question)
+            if args.mode == "baseline":
+                result = engine.answer_without_clarification(question)
+            else:
+                result = engine.handle(question)
             got = classify(result)
         except Exception as e:  # noqa: BLE001 - keep going if one case crashes
             result, got = None, "error"
@@ -68,6 +77,8 @@ def main() -> None:
     total_ok = sum(r["correct"] for r in rows_out)
 
     lines = [
+        f"Mode: {args.mode}",
+        "",
         "| Metric | Result |",
         "|---|---|",
         f"| Clarification recall (asked when it should) | {recall[0]}/{recall[1]} |",
@@ -78,7 +89,7 @@ def main() -> None:
     ]
     report = "\n".join(lines)
     print("\n" + report)
-    Path("eval_report.md").write_text(report + "\n", encoding="utf-8")
+    Path(args.out).write_text(report + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

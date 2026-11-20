@@ -111,3 +111,7 @@ class Engine:
                     SQLDraft,
                 )
         return Refusal(reason="Unexpected failure")
+
+    def answer_without_clarification(self, question: str) -> Answer | Refusal:
+        """Baseline: skip the analyzer and go straight to writing SQL."""
+        return self._generate_and_run(question)
