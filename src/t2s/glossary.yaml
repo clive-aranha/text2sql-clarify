@@ -43,3 +43,9 @@ terms:
     - website traffic
   order status values:
     definition: orders.status is one of placed, shipped, delivered, cancelled, refunded. "Delivered orders" means status = 'delivered'.
+  placed an order:
+    definition: >
+      "Orders placed" and "customers who placed an order" mean any row in orders,
+      counted by orders.order_date, regardless of status. It does NOT mean
+      orders.status = 'placed'. Only filter on status = 'placed' when the user
+      explicitly says "orders with status placed".
