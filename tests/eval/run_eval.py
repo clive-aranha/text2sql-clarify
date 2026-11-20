@@ -1,4 +1,5 @@
 import argparse
+import sys
 import time
 from decimal import Decimal
 from pathlib import Path
@@ -55,6 +56,9 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001 - keep going if one case crashes
             result, got = None, "error"
             print("  error:", e)
+            if "429" in str(e):
+                print("Rate limit hit. Stopping, because results would be invalid.")
+                sys.exit(1)
 
         correct = got == expect
         if expect == "answer" and got == "answer":
@@ -86,6 +90,7 @@ def main() -> None:
         f"| False clarifications (asked when it should not) | {false_ask[0]}/{false_ask[1]} |",
         f"| Correct refusals | {refused[0]}/{refused[1]} |",
         f"| Overall | {total_ok}/{len(rows_out)} |",
+        f"| Crashed cases | {sum(r['got'] == 'error' for r in rows_out)} |",
     ]
     report = "\n".join(lines)
     print("\n" + report)
