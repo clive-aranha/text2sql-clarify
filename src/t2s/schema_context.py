@@ -5,17 +5,26 @@ import psycopg
 
 def get_schema_text(dsn: str) -> tuple[str, set[str]]:
     query = """
-        SELECT table_name, column_name, data_type
-        FROM information_schema.columns
-        WHERE table_schema = 'public'
-        ORDER BY table_name, ordinal_position
+        SELECT c.table_name,
+               c.column_name,
+               c.data_type,
+               col_description(
+                   format('public.%I', c.table_name)::regclass,
+                   c.ordinal_position::int
+               ) AS comment
+        FROM information_schema.columns c
+        WHERE c.table_schema = 'public'
+        ORDER BY c.table_name, c.ordinal_position
     """
     tables: dict[str, list[str]] = {}
     with psycopg.connect(dsn) as conn:
-        for table, column, dtype in conn.execute(query):
-            tables.setdefault(table, []).append(f"{column} {dtype}")
-    text = "\n".join(f"{t}({', '.join(cols)})" for t, cols in tables.items())
-    return text, set(tables)
+        for table, column, dtype, comment in conn.execute(query):
+            text = f"{column} {dtype}"
+            if comment:
+                text += f" /* {comment} */"
+            tables.setdefault(table, []).append(text)
+    schema = "\n".join(f"{t}({', '.join(cols)})" for t, cols in tables.items())
+    return schema, set(tables)
 
 
 def get_glossary() -> str:

@@ -41,3 +41,5 @@ terms:
     - profit and margin (no cost data)
     - customer age or gender
     - website traffic
+  order status values:
+    definition: orders.status is one of placed, shipped, delivered, cancelled, refunded. "Delivered orders" means status = 'delivered'.
